@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "community.keycast",
+  "name": "Keycast",
+  "version": "0.1.0",
+  "author": "devmobasa",
+  "description": "On-screen keystroke HUD for screencasts, fed by Hyprland's Lua key event bus",
+  "license": "MIT",
+  "kinds": ["service", "bar-widget"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "KeycastWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Keycast",
+    "description": "Keystroke HUD toggle",
+    "category": "Plugin",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
