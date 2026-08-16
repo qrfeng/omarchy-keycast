@@ -1,5 +1,12 @@
 # Keycast
 
+## Demo
+
+[demo.webm](https://github.com/user-attachments/assets/f7aa50bc-3e11-49d3-a3b8-129dde8f0629)
+
+
+## About
+
 An on-screen keystroke HUD for screencasts on
 [Omarchy](https://omarchy.org) v4 ("Quattro") with Hyprland ≥ 0.56 (Lua
 config provider).
