@@ -3,7 +3,7 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// Keycast toggle chip: lit while keystrokes are being displayed. All
+// Keycast toggle chip: lit while chords are being displayed. All
 // logic lives in the always-loaded service; the widget is a thin view.
 BarWidget {
   id: root
@@ -13,6 +13,9 @@ BarWidget {
   property int resolveAttempts: 0
 
   readonly property bool keycastOn: engine ? engine.enabled === true : false
+  readonly property bool showAll: engine ? engine.scope === "all" : false
+
+  readonly property string scopeText: showAll ? "全部按键" : "仅快捷键"
 
   implicitWidth: engine ? button.implicitWidth : 0
   implicitHeight: engine ? button.implicitHeight : 0
@@ -41,8 +44,8 @@ BarWidget {
     text: "󰌌"
     active: root.keycastOn
     tooltipText: root.keycastOn
-      ? "Keycast on — keystrokes show on screen (mind passwords!) · click to stop"
-      : "Keycast off — click to show keystrokes for screencasts"
+      ? "快捷键 HUD：已开（" + root.scopeText + "）· 按住 Super/Ctrl/Alt/Shift 会列出可用快捷键 · 点击关闭"
+      : "快捷键 HUD：已关 · 点击开启（按住 Super/Ctrl/Alt/Shift 看可用快捷键），密码也会上屏"
     onPressed: if (root.engine) root.engine.setEnabled(!root.keycastOn)
   }
 }

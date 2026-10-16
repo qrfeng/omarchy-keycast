@@ -28,7 +28,17 @@ assert.match(service, /KeycastModel\.applyEvent/, 'the HUD state is a pure reduc
 assert.match(service, /"configreloaded"/, 're-registers after config reload drops the Lua VM')
 assert.doesNotMatch(service + widget + model, /\/dev\/input|libinput/,
   'never reads input devices directly')
-assert.doesNotMatch(service, /FileView|setText/, 'keystrokes are never written to disk')
+// Persistence is deliberately narrow: no keystrokes at all, only how often a
+// chord that actually fired has been used, in the user's state dir, capped.
+assert.equal((service.match(/^\s*path:/gm) || []).length, 1,
+  'the usage counter file is the only thing the plugin writes')
+assert.match(service, /\.local\/state\/omarchy\/keycast-usage\.json/,
+  'counters live in the state dir, and are named for what they hold')
+assert.match(model, /topUsage/, 'the counter file is capped, never an unbounded log')
+assert.doesNotMatch(service, /setText\([^)]*(parsed|event\.data|lastEvent)/,
+  'raw keystrokes are never written to disk')
+assert.match(service, /Object\.keys\(fresh\.mods\)\.length > 0/,
+  'only chords with a modifier are tallied, never ordinary typing')
 
 // The HUD surface never takes input or focus.
 assert.match(service, /WlrKeyboardFocus\.None/, 'the HUD never takes keyboard focus')
@@ -39,10 +49,18 @@ assert.match(service, /WlrLayer\.Overlay/)
 assert.match(model, /KEYCAST_SUB:remove\(\)/, 'disable removes the compositor-side handler')
 assert.match(service, /if \(!root\.enabled\) return/, 'stray events are dropped while off')
 
-// Process hygiene.
+// Process hygiene. Two spawns, both argv arrays: the compositor-side handler
+// registration, and reading the keybinds manager's model for the hint list.
 assert.doesNotMatch(service + widget, /execDetached|bash -c|sh -c/, 'no shell command strings')
-assert.equal((service.match(/\bProcess\s*\{/g) || []).length, 1,
-  'one process: the repl register/unregister call')
+assert.equal((service.match(/\bProcess\s*\{/g) || []).length, 2,
+  'two processes: the repl register call and the keybind catalogue')
+assert.match(service, /"omarchy-keybinds", "list"/, 'hints reuse the keybinds manager model instead of a second parser')
+assert.match(service, /KeycastModel\.parseBindings/, 'the catalogue is parsed before it is trusted')
+assert.match(service, /hintDelayMs/, 'hints wait for a real hold, so typing never flashes a list')
+assert.match(service, /delegate: Row \{/, 'each hint is one Row, so its three cells can never drift apart')
+assert.match(service, /root\.chordColWidth/, 'the chord column has one measured width for every row')
+assert.match(service, /modelData\.group/, 'the hint table shows the bind category between chord and description')
+assert.match(model, /HINT_MODS/, 'only Super/Ctrl/Alt/Shift can raise the hint list')
 assert.equal((widget.match(/\bProcess\s*\{/g) || []).length, 0, 'the widget spawns nothing')
 assert.match(service, /property bool exitSeen/, 'the repl process detects unstartable hyprctl')
 
